@@ -8,9 +8,24 @@ const apiRoutes = require('./routes/api');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable CORS
+// Safe and flexible CORS configuration
+const allowedOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',').map(s => s.trim()) 
+    : ['*'];
+
 app.use(cors({
-    origin: '*',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. mobile apps, curl, server-to-server health checks)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        // Safely permit any onrender.com subdomain or localhost during hackathon demo deployment
+        if (origin.endsWith('.onrender.com') || origin.startsWith('http://localhost:')) {
+            return callback(null, true);
+        }
+        return callback(new Error('CORS restriction: Origin not allowed.'));
+    },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
