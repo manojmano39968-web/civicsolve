@@ -1,0 +1,19 @@
+{
+  "name": "civicsolve-backend",
+  "version": "1.0.0",
+  "description": "CivicSolve Node.js Express Backend with PostgreSQL & SQLite Dual-Mode Adapter",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "seed": "node src/db/seed.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}

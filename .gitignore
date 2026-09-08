@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Databases & local state
+database/*.db
+database/*.db-wal
+database/*.db-shm
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
