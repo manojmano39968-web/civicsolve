@@ -2,6 +2,8 @@
 > **Connect People | Solve Problems | Create Impact**  
 > *Smart India Hackathon Working MVP Prototype*
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/manojmano39968-web/civicsolve)
+
 ---
 
 ## 1. What is CivicSolve?
