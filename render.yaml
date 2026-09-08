@@ -46,7 +46,7 @@ services:
         fromService:
           type: web
           name: civicsolve-ai
-          property: hostport
+          envVarKey: RENDER_EXTERNAL_URL
 
   # 3. Web Application Frontend (React 18 / Vite / Tailwind)
   # CDN-hosted Static Site using the backend's public external HTTPS URL during build

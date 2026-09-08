@@ -55,7 +55,12 @@ function localAnalyzeFallback(title, description, location) {
     let severity = 'High';
     let keywords = ['waterlogging', 'drainage', 'monsoon', 'culvert'];
 
-    if (text.includes('waste') || text.includes('garbage') || text.includes('dump') || text.includes('plastic')) {
+    if (text.includes('flood') || text.includes('waterlog') || text.includes('drainage') || text.includes('inundat') || text.includes('rain')) {
+        category = 'Urban Infrastructure / Flood Management';
+        domain = 'Civil Infrastructure & Hydrology';
+        required_skills = ['Hydrology', 'Drainage Design', 'GIS', 'Urban Planning'];
+        keywords = ['waterlogging', 'drainage', 'monsoon', 'culvert'];
+    } else if (text.includes('waste') || text.includes('garbage') || text.includes('dump') || text.includes('plastic')) {
         category = 'Waste Management & Environment';
         domain = 'Environmental Engineering & Public Policy';
         required_skills = ['Waste Management', 'Environmental Engineering', 'Community Engagement'];
