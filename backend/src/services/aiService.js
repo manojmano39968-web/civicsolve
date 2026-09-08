@@ -2,7 +2,11 @@ const axios = require('axios');
 
 let rawAiUrl = process.env.AI_SERVICE_URL || 'http://127.0.0.1:8000';
 if (!rawAiUrl.startsWith('http://') && !rawAiUrl.startsWith('https://')) {
-    rawAiUrl = `https://${rawAiUrl}`;
+    if (rawAiUrl.includes(':') || !rawAiUrl.includes('.')) {
+        rawAiUrl = `http://${rawAiUrl}`;
+    } else {
+        rawAiUrl = `https://${rawAiUrl}`;
+    }
 }
 const AI_SERVICE_URL = rawAiUrl.replace(/\/+$/, '');
 
