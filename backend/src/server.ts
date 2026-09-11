@@ -38,20 +38,38 @@ app.use(
   })
 );
 
-// CORS configuration
+// CORS configuration with same-origin and safe rejection support
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
-      if (config.allowedOrigins.indexOf(origin) !== -1 || config.env === 'development') {
-        return callback(null, true);
-      }
-      return callback(new Error('Blocked by CORS policy'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  cors((req: Request, callback: any) => {
+    const origin = req.header('Origin');
+    const host = req.header('Host');
+
+    // Allow requests with no origin (curl, mobile native apps, same-origin without Origin header)
+    if (!origin) {
+      return callback(null, { origin: true, credentials: true });
+    }
+
+    // Always allow same-origin requests (browser subresource loading, e.g. <script crossorigin> and <link crossorigin>)
+    const isSameOrigin = host && (
+      origin === `https://${host}` ||
+      origin === `http://${host}`
+    );
+    if (isSameOrigin) {
+      return callback(null, { origin: true, credentials: true });
+    }
+
+    // Allow Render external URL if defined
+    if (process.env.RENDER_EXTERNAL_URL && origin === process.env.RENDER_EXTERNAL_URL) {
+      return callback(null, { origin: true, credentials: true });
+    }
+
+    // Allow explicitly configured origins or development mode
+    if (config.env === 'development' || config.allowedOrigins.includes(origin)) {
+      return callback(null, { origin: true, credentials: true });
+    }
+
+    // Safely disallow without throwing an Error (which would abort the request with 500 JSON error)
+    return callback(null, { origin: false });
   })
 );
 
@@ -154,7 +172,18 @@ const frontendDistCandidates = [
 const frontendDist = frontendDistCandidates.find(p => fs.existsSync(p));
 
 if (frontendDist) {
-  app.use(express.static(frontendDist));
+  // 1. Serve static files with explicit index option
+  app.use(express.static(frontendDist, {
+    index: 'index.html',
+    maxAge: '1d',
+  }));
+
+  // 2. Guard: Prevent SPA fallback from swallowing missing /assets/* requests
+  app.get('/assets/*', (_req: Request, res: Response) => {
+    res.status(404).type('text/plain').send('Asset not found');
+  });
+
+  // 3. SPA fallback for client-side navigation routes (e.g. /search, /login, /requests)
   app.get('*', (req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith('/api/')) return next();
     res.sendFile(path.join(frontendDist, 'index.html'));

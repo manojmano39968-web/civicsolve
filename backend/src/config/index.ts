@@ -50,7 +50,16 @@ export function loadConfig(envOverrides?: Record<string, string | undefined>): A
     jwtRefreshSecret: refreshSecret || DEFAULT_DEV_REFRESH_SECRET,
     jwtAccessExpiresIn: 15 * 60, // 15 minutes
     jwtRefreshExpiresIn: 7 * 24 * 60 * 60, // 7 days
-    allowedOrigins: (envOverrides?.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(','),
+    allowedOrigins: (() => {
+      const origins = (envOverrides?.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000')
+        .split(',')
+        .map(o => o.trim())
+        .filter(Boolean);
+      if (process.env.RENDER_EXTERNAL_URL && !origins.includes(process.env.RENDER_EXTERNAL_URL)) {
+        origins.push(process.env.RENDER_EXTERNAL_URL);
+      }
+      return origins;
+    })(),
     cookieSecure: (envOverrides?.COOKIE_SECURE ?? process.env.COOKIE_SECURE) === 'true' || isProd || (envOverrides?.COOKIE_SAME_SITE || process.env.COOKIE_SAME_SITE) === 'none',
     cookieSameSite: ((envOverrides?.COOKIE_SAME_SITE || process.env.COOKIE_SAME_SITE || 'lax') as 'lax' | 'strict' | 'none'),
     trustProxy: (envOverrides?.TRUST_PROXY ?? process.env.TRUST_PROXY) === 'true' || isProd,
