@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/constants/roles.ts","./src/constants/status.ts","./src/types/admin.ts","./src/types/auth.ts","./src/types/provider.ts","./src/types/request.ts","./src/types/review.ts","./src/types/search.ts","./src/types/taxonomy.ts"],"version":"5.9.3"}

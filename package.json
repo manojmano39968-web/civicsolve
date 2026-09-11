@@ -1,0 +1,27 @@
+{
+  "name": "civicsolve-v2",
+  "version": "2.0.0",
+  "description": "CivicSolve V2 — Connect People | Solve Problems | Create Impact",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --prefix backend & npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix shared && npm run build --prefix backend && npm run build --prefix frontend",
+    "test": "npm run test --prefix backend",
+    "lint": "npm run lint --prefix backend && npm run lint --prefix frontend"
+  },
+  "keywords": [
+    "civicsolve",
+    "problem-solving",
+    "service-discovery",
+    "civic-tech"
+  ],
+  "author": "CivicSolve Team",
+  "license": "MIT"
+}

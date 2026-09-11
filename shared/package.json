@@ -1,0 +1,14 @@
+{
+  "name": "@civicsolve/shared",
+  "version": "2.0.0",
+  "description": "Shared types and contracts for CivicSolve V2",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
