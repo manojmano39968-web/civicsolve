@@ -129,21 +129,27 @@ class SQLiteDatabase implements IDatabase {
   }
 
   async transaction<T>(callback: (client: IDatabase) => Promise<T>): Promise<T> {
-    const runTransaction = this.db.transaction((cb: () => Promise<T>) => {
-      // In better-sqlite3 synchronous transaction
-      return cb();
-    });
-
-    const transactionalDb: IDatabase = {
-      query: this.query.bind(this),
-      transaction: async () => {
-        throw new Error('Nested transactions not supported');
-      },
-      close: async () => {},
-      isPostgres: () => false,
-    };
-
-    return runTransaction(() => callback(transactionalDb));
+    this.db.exec('BEGIN');
+    try {
+      const transactionalDb: IDatabase = {
+        query: this.query.bind(this),
+        transaction: async () => {
+          throw new Error('Nested transactions not supported');
+        },
+        close: async () => {},
+        isPostgres: () => false,
+      };
+      const result = await callback(transactionalDb);
+      this.db.exec('COMMIT');
+      return result;
+    } catch (err) {
+      try {
+        this.db.exec('ROLLBACK');
+      } catch {
+        // ignore rollback errors if already aborted
+      }
+      throw err;
+    }
   }
 
   async close(): Promise<void> {

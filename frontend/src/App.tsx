@@ -3,6 +3,9 @@ import { Sparkles, ShieldCheck, HeartHandshake, User as UserIcon, LogOut, Wrench
 import { AuthProvider, useAuth } from './features/auth/AuthContext.tsx';
 import { AuthModal } from './features/auth/AuthModal.tsx';
 import { Button, Badge } from './components/ui/index.ts';
+import { ProviderOnboardingWizard } from './features/providers/ProviderOnboardingWizard.tsx';
+import { ProviderProfilePage } from './features/providers/ProviderProfilePage.tsx';
+import { ProviderDashboard } from './features/providers/ProviderDashboard.tsx';
 
 function Header() {
   const { user, isAuthenticated, openAuthModal, logout } = useAuth();
@@ -31,6 +34,13 @@ function Header() {
         <div className="flex items-center gap-3">
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">
+              {user.role === 'PROVIDER' && (
+                <Link to="/provider/dashboard">
+                  <Button variant="secondary" size="sm" leftIcon={<Wrench className="w-3.5 h-3.5 text-brand-accent" />}>
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
               <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
                 <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600">
                   <UserIcon className="w-4 h-4" />
@@ -147,6 +157,9 @@ export default function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/provider/onboard" element={<ProviderOnboardingWizard />} />
+              <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+              <Route path="/provider/:id" element={<ProviderProfilePage />} />
             </Routes>
           </main>
           <AuthModal />
