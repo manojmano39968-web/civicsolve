@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { RequestController } from '../controllers/request.controller.js';
+import { ReviewController } from '../controllers/review.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 
 const router = Router();
@@ -19,5 +20,8 @@ router.patch('/:id/start', RequestController.start);
 router.patch('/:id/complete', RequestController.complete);
 router.patch('/:id/cancel', RequestController.cancel);
 router.patch('/:id/dispute', RequestController.dispute);
+
+// Verified Reviews (Milestone 8)
+router.post('/:id/reviews', ReviewController.create);
 
 export default router;

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api.ts';
-import { ProviderPublicSummary } from '@civicsolve/shared';
+import { useAuth } from '../auth/AuthContext.tsx';
+import { ProviderPublicSummary, Review } from '@civicsolve/shared';
 import { Button, Card, Badge, Skeleton } from '../../components/ui/index.ts';
+import { RequestModal } from '../requests/RequestModal.tsx';
 import {
   Star,
   MapPin,
@@ -13,14 +15,19 @@ import {
   ArrowLeft,
   Building,
   User,
+  CheckCircle2,
+  MessageSquare,
 } from 'lucide-react';
 import { PRICING_UNITS } from '@civicsolve/shared';
 
 export const ProviderProfilePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated, openAuthModal } = useAuth();
 
   const [provider, setProvider] = useState<ProviderPublicSummary | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +40,16 @@ export const ProviderProfilePage: React.FC = () => {
           params: { lat: 12.9716, lng: 77.5946 },
         });
         setProvider(res.data.data);
+
+        // Fetch reviews feed
+        try {
+          const revRes = await api.get(`/providers/${id}/reviews`);
+          if (revRes.data.success) {
+            setReviews(revRes.data.data);
+          }
+        } catch {
+          // Non-blocking
+        }
       } catch (err: any) {
         setError(err.response?.data?.error?.message || 'Failed to load provider profile.');
       } finally {
@@ -230,6 +247,65 @@ export const ProviderProfilePage: React.FC = () => {
         </div>
       </Card>
 
+      {/* Verified Reviews Section */}
+      <Card className="space-y-4">
+        <div className="flex items-center justify-between border-b border-surface-border pb-3">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-brand-primary" />
+              Verified Reviews & Track Record
+            </h2>
+            <p className="text-xs text-slate-500">
+              Reviews can strictly only be submitted after a verified problem resolution.
+            </p>
+          </div>
+          <div className="flex items-center gap-1 font-extrabold text-slate-900 text-sm">
+            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            <span>{provider.ratingAvg.toFixed(1)}</span>
+            <span className="text-xs text-slate-400 font-normal">({reviews.length} reviews)</span>
+          </div>
+        </div>
+
+        {reviews.length === 0 ? (
+          <div className="p-6 text-center text-xs text-slate-400">
+            No reviews yet. Be the first to solve a problem with {provider.fullName}!
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {reviews.map((rev) => (
+              <div key={rev.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50/70 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs text-slate-800">{rev.neederName || 'Customer'}</span>
+                    <span className="text-[10px] text-emerald-700 bg-emerald-100 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Problem Solved
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-0.5">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={`w-3.5 h-3.5 ${
+                          s <= rev.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {rev.comment && (
+                  <p className="text-xs text-slate-600 leading-relaxed italic">
+                    "{rev.comment}"
+                  </p>
+                )}
+                <div className="text-[10px] text-slate-400">
+                  Verified resolution • {new Date(rev.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
       {/* Mobile Sticky CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-surface-border sm:static sm:bg-transparent sm:border-0 sm:p-0 z-20">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
@@ -241,13 +317,41 @@ export const ProviderProfilePage: React.FC = () => {
             size="lg"
             variant="accent"
             fullWidth={false}
-            className="w-full sm:w-auto shadow-md"
-            onClick={() => navigate(`/request/new?providerId=${provider.id}`)}
+            className="w-full sm:w-auto shadow-md font-bold"
+            onClick={() => {
+              if (!isAuthenticated) {
+                openAuthModal('login');
+              } else {
+                setIsRequestModalOpen(true);
+              }
+            }}
           >
             Request Service
           </Button>
         </div>
       </div>
+
+      {/* Service Request Creation Modal */}
+      {isRequestModalOpen && (
+        <RequestModal
+          isOpen={isRequestModalOpen}
+          onClose={() => setIsRequestModalOpen(false)}
+          provider={{
+            id: provider.id,
+            fullName: provider.fullName,
+            startingPrice: provider.services[0]?.startingPrice ?? undefined,
+            pricingUnit: provider.services[0]?.pricingUnit,
+            services: provider.services.map((s) => ({
+              serviceId: s.serviceId,
+              name: s.name,
+            })),
+          }}
+          onSuccess={() => {
+            setIsRequestModalOpen(false);
+            navigate('/requests');
+          }}
+        />
+      )}
     </div>
   );
 };
