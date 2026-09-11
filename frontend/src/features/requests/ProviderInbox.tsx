@@ -42,7 +42,7 @@ export const ProviderInbox: React.FC = () => {
         params: { status: activeTab },
       });
       if (res.data.success) {
-        setRequests(res.data.data);
+        setRequests(Array.isArray(res.data?.data) ? res.data.data : []);
       }
     } catch (err) {
       console.error('Failed to load provider requests:', err);

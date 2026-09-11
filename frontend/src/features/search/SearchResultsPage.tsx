@@ -63,7 +63,7 @@ export const SearchResultsPage: React.FC = () => {
     api.get('/taxonomy/categories')
       .then((res) => {
         if (res.data.success) {
-          setCategories(res.data.data);
+          setCategories(Array.isArray(res.data?.data) ? res.data.data : []);
         }
       })
       .catch((err) => console.error('Failed to load categories:', err));
@@ -104,7 +104,16 @@ export const SearchResultsPage: React.FC = () => {
         });
 
         if (!isMounted) return;
-        setProviders(providersRes.data.data || []);
+        const resData = providersRes.data?.data;
+        const providerList: MatchedProvider[] = Array.isArray(resData)
+          ? resData
+          : Array.isArray(resData?.providers)
+          ? resData.providers
+          : [];
+        setProviders(providerList);
+        if (resData?.understanding && !understanding) {
+          setUnderstanding(resData.understanding);
+        }
       } catch (err: any) {
         if (!isMounted) return;
         console.error('Search failed:', err);
@@ -138,7 +147,8 @@ export const SearchResultsPage: React.FC = () => {
   };
 
   // Sort providers based on chosen sort option
-  const sortedProviders = [...providers].sort((a, b) => {
+  const safeProviders = Array.isArray(providers) ? providers : [];
+  const sortedProviders = [...safeProviders].sort((a, b) => {
     if (filters.sortBy === 'DISTANCE') {
       return a.distanceKm - b.distanceKm;
     }

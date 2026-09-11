@@ -38,10 +38,11 @@ export const RequestsPage: React.FC = () => {
         params: filter !== 'ALL' ? { status: filter } : {},
       });
       if (res.data.success) {
-        setRequests(res.data.data);
+        const list = Array.isArray(res.data.data) ? res.data.data : [];
+        setRequests(list);
         if (selectedRequest) {
           // Refresh selected if still in list
-          const updated = res.data.data.find((r: ServiceRequest) => r.id === selectedRequest.id);
+          const updated = list.find((r: ServiceRequest) => r.id === selectedRequest.id);
           if (updated) {
             // fetch detailed request with timeline
             const detailRes = await api.get(`/requests/${selectedRequest.id}`);
