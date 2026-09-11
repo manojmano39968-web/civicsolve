@@ -6,10 +6,12 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node -e \"const fs=require('fs'); fs.mkdirSync('dist/database', {recursive: true}); fs.copyFileSync('src/database/schema.sql', 'dist/database/schema.sql');\"",
     "start": "node dist/server.js",
     "db:migrate": "tsx src/database/migrate.ts",
+    "db:migrate:prod": "node dist/database/migrate.js",
     "db:seed": "tsx src/database/seed.ts",
+    "db:seed:prod": "node dist/database/seed.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit"

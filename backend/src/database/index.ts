@@ -25,12 +25,19 @@ class PostgresDatabase implements IDatabase {
   private pool: pg.Pool;
 
   constructor(connectionString: string) {
+    const isSsl =
+      config.env === 'production' ||
+      connectionString.includes('sslmode=require') ||
+      connectionString.includes('neon.tech') ||
+      connectionString.includes('supabase.co') ||
+      process.env.DATABASE_SSL === 'true';
+
     this.pool = new pg.Pool({
       connectionString,
       max: 10,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
-      ssl: config.env === 'production' ? { rejectUnauthorized: false } : undefined,
+      connectionTimeoutMillis: 10000,
+      ssl: isSsl ? { rejectUnauthorized: false } : undefined,
     });
   }
 

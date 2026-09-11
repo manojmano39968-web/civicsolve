@@ -8,7 +8,27 @@ const __dirname = path.dirname(__filename);
 
 export async function runMigrations(): Promise<void> {
   const db = getDatabase();
-  const schemaPath = path.resolve(__dirname, 'schema.sql');
+  let schemaPath = path.resolve(__dirname, 'schema.sql');
+  if (!fs.existsSync(schemaPath)) {
+    const candidates = [
+      path.resolve(__dirname, '../../src/database/schema.sql'),
+      path.resolve(__dirname, '../src/database/schema.sql'),
+      path.resolve(process.cwd(), 'src/database/schema.sql'),
+      path.resolve(process.cwd(), 'backend/src/database/schema.sql'),
+      path.resolve(process.cwd(), 'backend/dist/database/schema.sql'),
+    ];
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        schemaPath = candidate;
+        break;
+      }
+    }
+  }
+
+  if (!fs.existsSync(schemaPath)) {
+    throw new Error(`Schema file not found at ${schemaPath} or any standard fallback paths.`);
+  }
+
   const schemaSql = fs.readFileSync(schemaPath, 'utf8');
 
   console.log('🔄 Running database migrations...');

@@ -13,6 +13,9 @@
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "build": "npm run build --prefix shared && npm run build --prefix backend && npm run build --prefix frontend",
+    "start": "node backend/dist/server.js",
+    "db:migrate": "npm run db:migrate:prod --prefix backend",
+    "db:seed": "npm run db:seed:prod --prefix backend",
     "test": "npm run test --prefix backend",
     "lint": "npm run lint --prefix backend && npm run lint --prefix frontend"
   },

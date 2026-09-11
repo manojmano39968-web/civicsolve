@@ -15,6 +15,7 @@ export interface AppConfig {
   jwtRefreshExpiresIn: number; // in seconds (e.g., 604800 = 7d)
   allowedOrigins: string[];
   cookieSecure: boolean;
+  cookieSameSite: 'lax' | 'strict' | 'none';
   trustProxy: boolean;
 }
 
@@ -50,7 +51,8 @@ export function loadConfig(envOverrides?: Record<string, string | undefined>): A
     jwtAccessExpiresIn: 15 * 60, // 15 minutes
     jwtRefreshExpiresIn: 7 * 24 * 60 * 60, // 7 days
     allowedOrigins: (envOverrides?.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(','),
-    cookieSecure: (envOverrides?.COOKIE_SECURE ?? process.env.COOKIE_SECURE) === 'true' || isProd,
+    cookieSecure: (envOverrides?.COOKIE_SECURE ?? process.env.COOKIE_SECURE) === 'true' || isProd || (envOverrides?.COOKIE_SAME_SITE || process.env.COOKIE_SAME_SITE) === 'none',
+    cookieSameSite: ((envOverrides?.COOKIE_SAME_SITE || process.env.COOKIE_SAME_SITE || 'lax') as 'lax' | 'strict' | 'none'),
     trustProxy: (envOverrides?.TRUST_PROXY ?? process.env.TRUST_PROXY) === 'true' || isProd,
   };
 }

@@ -26,8 +26,12 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+const apiBase = (import.meta as any).env?.VITE_API_URL
+  ? `${(import.meta as any).env.VITE_API_URL.replace(/\/$/, '')}/api/v1`
+  : '/api/v1';
+
 export const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: apiBase,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -74,7 +78,7 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          '/api/v1/auth/refresh',
+          `${apiBase}/auth/refresh`,
           {},
           { withCredentials: true }
         );

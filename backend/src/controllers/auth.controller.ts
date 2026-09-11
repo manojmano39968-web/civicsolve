@@ -11,7 +11,7 @@ function setRefreshCookie(res: Response, token: string) {
   res.cookie(REFRESH_COOKIE_NAME, token, {
     httpOnly: true,
     secure: config.cookieSecure,
-    sameSite: 'lax',
+    sameSite: config.cookieSameSite,
     path: '/api/v1/auth',
     maxAge: config.jwtRefreshExpiresIn * 1000,
   });
@@ -21,7 +21,7 @@ function clearRefreshCookie(res: Response) {
   res.clearCookie(REFRESH_COOKIE_NAME, {
     httpOnly: true,
     secure: config.cookieSecure,
-    sameSite: 'lax',
+    sameSite: config.cookieSameSite,
     path: '/api/v1/auth',
   });
 }

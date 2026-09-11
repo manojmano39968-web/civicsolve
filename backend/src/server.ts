@@ -1,4 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -138,6 +141,25 @@ app.use('/api/v1/providers', providerRoutes);
 app.use('/api/v1/search', searchRoutes);
 app.use('/api/v1/requests', requestRoutes);
 app.use('/api/v1/admin', adminRoutes);
+
+// Serve compiled Frontend SPA in production / staging if dist folder exists
+const currentDir = path.dirname(fileURLToPath(import.meta.url));
+const frontendDistCandidates = [
+  path.resolve(process.cwd(), 'frontend', 'dist'),
+  path.resolve(process.cwd(), '..', 'frontend', 'dist'),
+  path.resolve(process.cwd(), 'dist', 'frontend'),
+  path.resolve(currentDir, '../../frontend/dist'),
+  path.resolve(currentDir, '../../../frontend/dist'),
+];
+const frontendDist = frontendDistCandidates.find(p => fs.existsSync(p));
+
+if (frontendDist) {
+  app.use(express.static(frontendDist));
+  app.get('*', (req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 // Centralized error handler
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
