@@ -1,0 +1,20 @@
+{
+  "name": "CivicSolve V2 — Problem Solving & Service Discovery",
+  "short_name": "CivicSolve",
+  "description": "Natural-language civic problem solving and explainable service discovery platform.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8FAFC",
+  "theme_color": "#0F172A",
+  "icons": [
+    {
+      "src": "/assets/images/civicsolve-mark.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "productivity", "social"]
+}
