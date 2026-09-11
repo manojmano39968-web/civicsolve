@@ -13,6 +13,8 @@ import {
   Settings,
 } from 'lucide-react';
 
+import { ProviderInbox } from '../requests/ProviderInbox.tsx';
+
 export const ProviderDashboard: React.FC = () => {
   const { user, role } = useAuth();
   const navigate = useNavigate();
@@ -176,6 +178,15 @@ export const ProviderDashboard: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      {/* Incoming Requests & Active Jobs */}
+      <Card className="space-y-4">
+        <div>
+          <h2 className="text-base font-bold text-slate-900">Service Requests & Work Queue</h2>
+          <p className="text-xs text-slate-500">Real-time incoming jobs and active service tasks</p>
+        </div>
+        <ProviderInbox />
+      </Card>
 
       {/* Offered Services List */}
       <Card className="space-y-4">

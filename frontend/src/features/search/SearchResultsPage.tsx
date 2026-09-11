@@ -16,6 +16,7 @@ import { SearchBar } from './SearchBar.tsx';
 import { ProviderCard } from './ProviderCard.tsx';
 import { ClarificationPrompt } from './ClarificationPrompt.tsx';
 import { FilterSheet } from './FilterSheet.tsx';
+import { RequestModal } from '../requests/RequestModal.tsx';
 import { Button } from '../../components/ui/Button.tsx';
 import { Modal } from '../../components/ui/Modal.tsx';
 import { Input } from '../../components/ui/Input.tsx';
@@ -51,6 +52,7 @@ export const SearchResultsPage: React.FC = () => {
 
   // Requirement posting modal state (unmet requirement)
   const [isRequirementModalOpen, setIsRequirementModalOpen] = useState(false);
+  const [requestingProvider, setRequestingProvider] = useState<MatchedProvider | null>(null);
   const [reqTitle, setReqTitle] = useState(query);
   const [reqDescription, setReqDescription] = useState(query);
   const [isSubmittingReq, setIsSubmittingReq] = useState(false);
@@ -305,7 +307,7 @@ export const SearchResultsPage: React.FC = () => {
                   if (!isAuthenticated) {
                     openAuthModal('login');
                   } else {
-                    navigate(`/provider/${p.id}`);
+                    setRequestingProvider(p);
                   }
                 }}
               />
@@ -429,6 +431,25 @@ export const SearchResultsPage: React.FC = () => {
           </form>
         )}
       </Modal>
+
+      {/* Service Request Creation Modal */}
+      {requestingProvider && (
+        <RequestModal
+          isOpen={!!requestingProvider}
+          onClose={() => setRequestingProvider(null)}
+          provider={{
+            id: requestingProvider.id,
+            fullName: requestingProvider.fullName,
+            startingPrice: requestingProvider.startingPrice,
+            pricingUnit: requestingProvider.pricingUnit,
+            serviceName: requestingProvider.serviceName,
+          }}
+          onSuccess={() => {
+            setRequestingProvider(null);
+            navigate('/requests');
+          }}
+        />
+      )}
     </div>
   );
 };

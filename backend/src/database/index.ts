@@ -11,6 +11,8 @@ export interface QueryResult<T = any> {
 
 export interface IDatabase {
   query<T = any>(sql: string, params?: any[]): Promise<QueryResult<T>>;
+  queryOne<T = any>(sql: string, params?: any[]): Promise<T | null>;
+  run(sql: string, params?: any[]): Promise<{ changes: number }>;
   transaction<T>(callback: (client: IDatabase) => Promise<T>): Promise<T>;
   close(): Promise<void>;
   isPostgres(): boolean;
@@ -40,6 +42,16 @@ class PostgresDatabase implements IDatabase {
     };
   }
 
+  async queryOne<T = any>(sql: string, params: any[] = []): Promise<T | null> {
+    const res = await this.query<T>(sql, params);
+    return res.rows[0] ?? null;
+  }
+
+  async run(sql: string, params: any[] = []): Promise<{ changes: number }> {
+    const res = await this.query(sql, params);
+    return { changes: res.rowCount };
+  }
+
   async transaction<T>(callback: (client: IDatabase) => Promise<T>): Promise<T> {
     const client = await this.pool.connect();
     try {
@@ -48,6 +60,14 @@ class PostgresDatabase implements IDatabase {
         query: async <R = any>(sql: string, params: any[] = []): Promise<QueryResult<R>> => {
           const res = await client.query(sql, params);
           return { rows: res.rows as R[], rowCount: res.rowCount ?? 0 };
+        },
+        queryOne: async <R = any>(sql: string, params: any[] = []): Promise<R | null> => {
+          const res = await client.query(sql, params);
+          return (res.rows[0] as R) ?? null;
+        },
+        run: async (sql: string, params: any[] = []): Promise<{ changes: number }> => {
+          const res = await client.query(sql, params);
+          return { changes: res.rowCount ?? 0 };
         },
         transaction: async () => {
           throw new Error('Nested transactions not supported');
@@ -128,11 +148,23 @@ class SQLiteDatabase implements IDatabase {
     }
   }
 
+  async queryOne<T = any>(sql: string, params: any[] = []): Promise<T | null> {
+    const res = await this.query<T>(sql, params);
+    return res.rows[0] ?? null;
+  }
+
+  async run(sql: string, params: any[] = []): Promise<{ changes: number }> {
+    const res = await this.query(sql, params);
+    return { changes: res.rowCount };
+  }
+
   async transaction<T>(callback: (client: IDatabase) => Promise<T>): Promise<T> {
     this.db.exec('BEGIN');
     try {
       const transactionalDb: IDatabase = {
         query: this.query.bind(this),
+        queryOne: this.queryOne.bind(this),
+        run: this.run.bind(this),
         transaction: async () => {
           throw new Error('Nested transactions not supported');
         },
