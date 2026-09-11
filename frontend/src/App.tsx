@@ -9,6 +9,7 @@ import { ProviderDashboard } from './features/providers/ProviderDashboard.tsx';
 import { SearchBar } from './features/search/SearchBar.tsx';
 import { SearchResultsPage } from './features/search/SearchResultsPage.tsx';
 import { RequestsPage } from './features/requests/RequestsPage.tsx';
+import { AdminDashboard } from './features/admin/AdminDashboard.tsx';
 
 function Header() {
   const { user, isAuthenticated, openAuthModal, logout } = useAuth();
@@ -37,7 +38,13 @@ function Header() {
         <div className="flex items-center gap-3">
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">
-              {user.role === 'PROVIDER' ? (
+              {user.role === 'ADMIN' ? (
+                <Link to="/admin">
+                  <Button variant="secondary" size="sm" leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-brand-primary" />}>
+                    Admin Portal
+                  </Button>
+                </Link>
+              ) : user.role === 'PROVIDER' ? (
                 <Link to="/provider/dashboard">
                   <Button variant="secondary" size="sm" leftIcon={<Wrench className="w-3.5 h-3.5 text-brand-accent" />}>
                     Dashboard
@@ -234,6 +241,7 @@ export default function App() {
               <Route path="/provider/onboard" element={<ProviderOnboardingWizard />} />
               <Route path="/provider/dashboard" element={<ProviderDashboard />} />
               <Route path="/provider/:id" element={<ProviderProfilePage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
             </Routes>
           </main>
           <AuthModal />

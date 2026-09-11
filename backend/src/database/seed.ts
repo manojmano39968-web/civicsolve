@@ -612,6 +612,49 @@ export async function runSeeds(): Promise<void> {
     );
   }
 
+  // 1. Seed Platform Administrator
+  const adminId = 'usr-admin-master';
+  await db.query(
+    `INSERT INTO users (id, email, password_hash, role, full_name, phone, is_active)
+     VALUES ($1, 'admin@civicsolve.org', $2, 'ADMIN', 'CivicSolve Platform Admin', '+91 90000 00001', 1)
+     ON CONFLICT (email) DO NOTHING`,
+    [adminId, passwordHash]
+  );
+
+  // 2. Seed Default Matching Configuration Weights
+  const defaultWeights = [
+    { key: 'WEIGHT_SERVICE_MATCH', weight: 0.35, desc: 'Direct canonical service or problem match score' },
+    { key: 'WEIGHT_SKILL_OVERLAP', weight: 0.20, desc: 'Secondary skill keywords & colloquial phrase overlap' },
+    { key: 'WEIGHT_DISTANCE', weight: 0.15, desc: 'Proximity decay based on spherical distance' },
+    { key: 'WEIGHT_RADIUS_FIT', weight: 0.10, desc: 'Coverage ratio within provider operating radius' },
+    { key: 'WEIGHT_AVAILABILITY', weight: 0.05, desc: 'Real-time online & active ready-to-serve status' },
+    { key: 'WEIGHT_EXPERIENCE', weight: 0.05, desc: 'Years of demonstrated field experience' },
+    { key: 'WEIGHT_BAYESIAN_RATING', weight: 0.05, desc: 'Bayesian mean weighted customer satisfaction' },
+    { key: 'WEIGHT_VERIFICATION', weight: 0.05, desc: 'Government or institutional credential attestation' },
+  ];
+
+  for (const w of defaultWeights) {
+    await db.query(
+      `INSERT INTO matching_configuration (id, key, weight, description)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (key) DO NOTHING`,
+      [`cfg-${w.key}`, w.key, w.weight, w.desc]
+    );
+  }
+
+  // 3. Seed Sample Verification Attestation for an unverified provider
+  const unverifiedProv = await db.queryOne<{ id: string }>(
+    'SELECT id FROM provider_profiles WHERE is_verified = 0 LIMIT 1'
+  );
+  if (unverifiedProv) {
+    await db.query(
+      `INSERT INTO verification_attestations (id, provider_id, attestation_type, reference_data, status)
+       VALUES ($1, $2, 'BUSINESS_REG', 'GSTIN: 29AABCU9603R1ZM / Trade License #BLR-2024-9912', 'PENDING')
+       ON CONFLICT (provider_id) DO NOTHING`,
+      [`att-${unverifiedProv.id}`, unverifiedProv.id]
+    );
+  }
+
   console.log(`✅ Successfully seeded database with ${categories.length} categories, ${services.length} services, ${aliases.length} aliases, and ${demoProviders.length} realistic problem solvers.`);
 }
 

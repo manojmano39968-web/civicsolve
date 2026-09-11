@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.routes.js';
 import providerRoutes from './routes/provider.routes.js';
 import searchRoutes from './routes/search.routes.js';
 import requestRoutes from './routes/request.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 
 const app = express();
 
@@ -96,6 +97,7 @@ app.use('/api/v1/taxonomy', taxonomyRoutes);
 app.use('/api/v1/providers', providerRoutes);
 app.use('/api/v1/search', searchRoutes);
 app.use('/api/v1/requests', requestRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Centralized error handler
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
