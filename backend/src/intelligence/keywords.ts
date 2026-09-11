@@ -1,0 +1,155 @@
+/**
+ * Layer 2: Keyword Extraction & Tokenization
+ * Filters conversational filler stop-words and generates unigram/bi-gram candidates.
+ */
+
+const STOP_WORDS = new Set([
+  'i',
+  'me',
+  'my',
+  'myself',
+  'we',
+  'our',
+  'you',
+  'your',
+  'he',
+  'she',
+  'it',
+  'they',
+  'them',
+  'what',
+  'which',
+  'who',
+  'whom',
+  'this',
+  'that',
+  'these',
+  'those',
+  'am',
+  'is',
+  'are',
+  'was',
+  'were',
+  'be',
+  'been',
+  'being',
+  'have',
+  'has',
+  'had',
+  'do',
+  'does',
+  'did',
+  'a',
+  'an',
+  'the',
+  'and',
+  'but',
+  'if',
+  'or',
+  'because',
+  'as',
+  'until',
+  'while',
+  'of',
+  'at',
+  'by',
+  'for',
+  'with',
+  'about',
+  'against',
+  'between',
+  'into',
+  'through',
+  'during',
+  'before',
+  'after',
+  'above',
+  'below',
+  'to',
+  'from',
+  'up',
+  'down',
+  'in',
+  'out',
+  'on',
+  'off',
+  'over',
+  'under',
+  'again',
+  'further',
+  'then',
+  'once',
+  'here',
+  'there',
+  'when',
+  'where',
+  'why',
+  'how',
+  'all',
+  'any',
+  'both',
+  'each',
+  'few',
+  'more',
+  'most',
+  'other',
+  'some',
+  'such',
+  'no',
+  'nor',
+  'not',
+  'only',
+  'own',
+  'same',
+  'so',
+  'than',
+  'too',
+  'very',
+  's',
+  't',
+  'can',
+  'will',
+  'just',
+  'don',
+  'should',
+  'now',
+  // Conversational fillers
+  'need',
+  'needs',
+  'want',
+  'wants',
+  'looking',
+  'require',
+  'requires',
+  'please',
+  'someone',
+  'somebody',
+  'help',
+  'get',
+  'urgent',
+]);
+
+export function extractKeywords(normalizedText: string): {
+  tokens: string[];
+  meaningfulKeywords: string[];
+  ngrams: string[];
+} {
+  const tokens = normalizedText.split(' ').filter(t => t.length > 0);
+  const meaningfulKeywords = tokens.filter(t => !STOP_WORDS.has(t) && t.length > 1);
+
+  const ngrams: string[] = [];
+  // Generate bi-grams from normalized text
+  for (let i = 0; i < tokens.length - 1; i++) {
+    ngrams.push(`${tokens[i]} ${tokens[i + 1]}`);
+  }
+  // Generate tri-grams
+  for (let i = 0; i < tokens.length - 2; i++) {
+    ngrams.push(`${tokens[i]} ${tokens[i + 1]} ${tokens[i + 2]}`);
+  }
+
+  return {
+    tokens,
+    meaningfulKeywords,
+    ngrams,
+  };
+}

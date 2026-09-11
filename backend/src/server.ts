@@ -7,6 +7,7 @@ import { getDatabase } from './database/index.js';
 import taxonomyRoutes from './routes/taxonomy.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import providerRoutes from './routes/provider.routes.js';
+import searchRoutes from './routes/search.routes.js';
 
 const app = express();
 
@@ -92,6 +93,7 @@ app.get('/api/v1/health', async (req: Request, res: Response) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/taxonomy', taxonomyRoutes);
 app.use('/api/v1/providers', providerRoutes);
+app.use('/api/v1/search', searchRoutes);
 
 // Centralized error handler
 app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
