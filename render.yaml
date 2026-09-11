@@ -3,7 +3,7 @@ services:
     name: civicsolve-v2
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --include=dev && npm run build
     startCommand: npm run db:migrate && npm start
     healthCheckPath: /api/v1/health
     autoDeploy: true

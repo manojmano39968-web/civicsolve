@@ -15,7 +15,7 @@
     "build": "tsc -b",
     "clean": "rimraf dist"
   },
-  "devDependencies": {
+  "dependencies": {
     "typescript": "^5.5.4"
   }
 }

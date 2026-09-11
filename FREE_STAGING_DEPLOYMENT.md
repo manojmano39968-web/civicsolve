@@ -112,12 +112,12 @@ Render will build and host both your frontend and backend on a free sub-domain w
 5. **Fill in Web Service Settings:**
    - **Name:** Enter `civicsolve-staging` (or any unique name you like).
    - **Region:** Select the same region (or nearest) to your Neon database.
-   - **Branch:** `main`
+   - **Branch:** `v2-staging` (or `main`)
    - **Root Directory:** Leave **blank** (root of repo).
    - **Runtime:** Select **Node**.
    - **Build Command:** Enter:
      ```bash
-     npm install && npm run build
+     npm install --include=dev && npm run build
      ```
    - **Start Command:**
      - *For First-Time Deploy with Sample Data (categories, services, problem solvers):*
