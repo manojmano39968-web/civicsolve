@@ -143,7 +143,7 @@ export const SearchResultsPage: React.FC = () => {
       return a.distanceKm - b.distanceKm;
     }
     if (filters.sortBy === 'RATING') {
-      return b.ratingAverage - a.ratingAverage;
+      return (b.ratingAverage || 0) - (a.ratingAverage || 0);
     }
     if (filters.sortBy === 'PRICE_LOW') {
       return a.startingPrice - b.startingPrice;

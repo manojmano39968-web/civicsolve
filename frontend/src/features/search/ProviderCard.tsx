@@ -105,11 +105,18 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
 
             {/* Ratings and Experience */}
             <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-600">
-              <div className="flex items-center gap-1 font-semibold text-amber-600">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span>{provider.ratingAverage.toFixed(1)}</span>
-                <span className="text-slate-400 font-normal">({provider.ratingCount})</span>
-              </div>
+              {provider.ratingCount > 0 && provider.ratingAverage !== null ? (
+                <div className="flex items-center gap-1 font-semibold text-amber-600">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span>{provider.ratingAverage.toFixed(1)}</span>
+                  <span className="text-slate-400 font-normal">({provider.ratingCount})</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded text-[11px]">
+                  <Star className="w-3 h-3 text-slate-400" />
+                  <span>New · No reviews yet</span>
+                </div>
+              )}
               <span className="text-slate-300">•</span>
               <div className="text-slate-500">
                 {provider.experienceYears}y exp

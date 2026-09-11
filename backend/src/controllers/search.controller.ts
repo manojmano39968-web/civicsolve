@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { CivicSolveIntelligenceEngine } from '../intelligence/index.js';
+import { understandQuerySchema, searchProvidersSchema } from '../validators/search.validator.js';
 import { getDatabase } from '../database/index.js';
 import crypto from 'crypto';
 
@@ -9,18 +10,19 @@ const db = getDatabase();
 export class SearchController {
   static async understand(req: Request, res: Response, next: NextFunction) {
     try {
-      const query = req.query.q?.toString() || '';
-      if (!query.trim()) {
+      const parsed = understandQuerySchema.safeParse({ q: req.query.q });
+      if (!parsed.success) {
         return res.status(400).json({
           success: false,
           error: {
-            code: 'QUERY_REQUIRED',
-            message: 'Search query string parameter "q" is required.',
+            code: 'VALIDATION_ERROR',
+            message: parsed.error.errors[0].message,
+            details: parsed.error.errors,
           },
         });
       }
 
-      const understanding = await engine.understand(query);
+      const understanding = await engine.understand(parsed.data.q);
 
       res.status(200).json({
         success: true,
@@ -33,21 +35,33 @@ export class SearchController {
 
   static async searchProviders(req: Request, res: Response, next: NextFunction) {
     try {
-      const filters = req.body || {};
+      const parsed = searchProvidersSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: parsed.error.errors[0].message,
+            details: parsed.error.errors,
+          },
+        });
+      }
+
+      const filters = parsed.data;
 
       const result = await engine.matchProviders({
         query: filters.query,
         serviceId: filters.serviceId,
         categorySlug: filters.categorySlug,
-        latitude: filters.latitude !== undefined ? Number(filters.latitude) : undefined,
-        longitude: filters.longitude !== undefined ? Number(filters.longitude) : undefined,
-        maxDistanceKm: filters.maxDistanceKm !== undefined ? Number(filters.maxDistanceKm) : undefined,
-        minRating: filters.minRating !== undefined ? Number(filters.minRating) : undefined,
+        latitude: filters.latitude,
+        longitude: filters.longitude,
+        maxDistanceKm: filters.maxDistanceKm,
+        minRating: filters.minRating,
         serviceMode: filters.serviceMode,
         onlyAvailable: filters.onlyAvailable,
         onlyVerified: filters.onlyVerified,
-        page: filters.page ? Number(filters.page) : 1,
-        limit: filters.limit ? Number(filters.limit) : 10,
+        page: filters.page || 1,
+        limit: filters.limit || 10,
       });
 
       res.status(200).json({

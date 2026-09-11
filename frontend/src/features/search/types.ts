@@ -14,7 +14,7 @@ export interface MatchedProvider {
   tier?: string;
   isVerified: boolean;
   avatarUrl?: string;
-  ratingAverage: number;
+  ratingAverage: number | null;
   ratingCount: number;
   completedRequestsCount: number;
   startingPrice: number;

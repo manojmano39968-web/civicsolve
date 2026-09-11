@@ -130,11 +130,18 @@ export const ProviderProfilePage: React.FC = () => {
             <p className="text-base font-semibold text-brand-primary">{provider.professionalTitle}</p>
 
             <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-500 pt-1">
-              <div className="flex items-center gap-1 font-semibold text-slate-800">
-                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <span>{provider.ratingAvg.toFixed(1)}</span>
-                <span className="text-slate-400 font-normal">({provider.reviewCount} verified reviews)</span>
-              </div>
+              {provider.reviewCount > 0 && provider.ratingAvg !== null ? (
+                <div className="flex items-center gap-1 font-semibold text-slate-800">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <span>{provider.ratingAvg.toFixed(1)}</span>
+                  <span className="text-slate-400 font-normal">({provider.reviewCount} verified {provider.reviewCount === 1 ? 'review' : 'reviews'})</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 font-medium text-slate-600 bg-slate-100 px-3 py-1 rounded-full text-xs">
+                  <Star className="w-3.5 h-3.5 text-slate-400" />
+                  <span>New · No reviews yet</span>
+                </div>
+              )}
 
               <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4 text-slate-400" />
@@ -259,11 +266,18 @@ export const ProviderProfilePage: React.FC = () => {
               Reviews can strictly only be submitted after a verified problem resolution.
             </p>
           </div>
-          <div className="flex items-center gap-1 font-extrabold text-slate-900 text-sm">
-            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-            <span>{provider.ratingAvg.toFixed(1)}</span>
-            <span className="text-xs text-slate-400 font-normal">({reviews.length} reviews)</span>
-          </div>
+          {provider.reviewCount > 0 && provider.ratingAvg !== null ? (
+            <div className="flex items-center gap-1 font-extrabold text-slate-900 text-sm">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span>{provider.ratingAvg.toFixed(1)}</span>
+              <span className="text-xs text-slate-400 font-normal">({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-slate-500 text-xs font-medium bg-slate-100 px-2.5 py-1 rounded-full">
+              <Star className="w-3.5 h-3.5 text-slate-400" />
+              <span>New · No reviews yet</span>
+            </div>
+          )}
         </div>
 
         {reviews.length === 0 ? (

@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import rateLimit from 'express-rate-limit';
 import { config } from './config/index.js';
 import { getDatabase } from './database/index.js';
 import taxonomyRoutes from './routes/taxonomy.routes.js';
@@ -12,6 +13,10 @@ import requestRoutes from './routes/request.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 
 const app = express();
+
+if (config.trustProxy) {
+  app.set('trust proxy', 1);
+}
 
 // Security Headers with strict Content-Security-Policy
 app.use(
@@ -59,7 +64,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Health check endpoint
+// Health check endpoint (exempt from rate limits)
 app.get('/api/v1/health', async (req: Request, res: Response) => {
   try {
     const db = getDatabase();
@@ -91,8 +96,43 @@ app.get('/api/v1/health', async (req: Request, res: Response) => {
   }
 });
 
-// Routes
-app.use('/api/v1/auth', authRoutes);
+// Stricter Authentication Rate Limiter (brute-force defense)
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: config.env === 'test' ? (process.env.TEST_RATE_LIMIT ? 2 : 1000) : parseInt(process.env.RATE_LIMIT_AUTH_MAX || '10', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({
+      success: false,
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many authentication attempts. Please try again after 15 minutes.',
+      },
+    });
+  },
+});
+
+// Global API Rate Limiter
+export const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: config.env === 'test' ? (process.env.TEST_RATE_LIMIT ? 3 : 5000) : parseInt(process.env.RATE_LIMIT_API_MAX || '100', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({
+      success: false,
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many requests from this IP. Please try again after 15 minutes.',
+      },
+    });
+  },
+});
+
+// Mount Rate Limiters & Routes
+app.use('/api/v1/auth', authLimiter, authRoutes);
+app.use('/api/v1', apiLimiter);
 app.use('/api/v1/taxonomy', taxonomyRoutes);
 app.use('/api/v1/providers', providerRoutes);
 app.use('/api/v1/search', searchRoutes);

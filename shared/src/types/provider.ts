@@ -88,7 +88,7 @@ export interface ProviderPublicSummary {
   serviceMode: ServiceMode;
   serviceRadiusKm: number;
   isVerified: boolean;
-  ratingAvg: number;
+  ratingAvg: number | null;
   reviewCount: number;
   availability: AvailabilityStatus;
   area: string;

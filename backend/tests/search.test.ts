@@ -128,4 +128,33 @@ describe('CivicSolve Intelligence Engine & Search Matrix', () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data.id).toBeDefined();
   });
+
+  describe('Search Input Validation & Abuse Defense', () => {
+    it('rejects empty query string with 400', async () => {
+      const res = await request(app).get('/api/v1/search/understand?q=');
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects query strings exceeding 300 characters with 400', async () => {
+      const longQuery = 'a'.repeat(301);
+      const res = await request(app).get(`/api/v1/search/understand?q=${longQuery}`);
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.message).toContain('cannot exceed 300 characters');
+    });
+
+    it('rejects invalid filter parameters (limit > 50 or invalid latitude) with 400', async () => {
+      const resLimit = await request(app)
+        .post('/api/v1/search/providers')
+        .send({ query: 'plumber', limit: 100 });
+      expect(resLimit.status).toBe(400);
+
+      const resLat = await request(app)
+        .post('/api/v1/search/providers')
+        .send({ query: 'plumber', latitude: 150 });
+      expect(resLat.status).toBe(400);
+    });
+  });
 });

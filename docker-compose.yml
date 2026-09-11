@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: civicsolve-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: civicsolve
+      POSTGRES_PASSWORD: civicsolve_secure_password
+      POSTGRES_DB: civicsolve_v2
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civicsolve -d civicsolve_v2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: civicsolve-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: postgresql://civicsolve:civicsolve_secure_password@postgres:5432/civicsolve_v2
+      JWT_ACCESS_SECRET: prod_access_secret_civicsolve_v2_replace_in_actual_env_32chars!
+      JWT_REFRESH_SECRET: prod_refresh_secret_civicsolve_v2_replace_in_actual_env_32chars!
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+      COOKIE_SECURE: "false"
+      TRUST_PROXY: "true"
+    ports:
+      - "5000:5000"
+
+volumes:
+  pgdata:
+    driver: local

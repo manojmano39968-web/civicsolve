@@ -142,4 +142,18 @@ describe('Provider Profiles, Onboarding & Location Privacy', () => {
     expect(meRes.body.data.availability).toBe('BUSY');
     expect(meRes.body.data.statusNote).toBe('Currently working on an installation job.');
   });
+
+  it('GET /api/v1/providers/:id returns ratingAvg: null when provider has zero reviews', async () => {
+    // Check the newly onboarded test provider (has 0 reviews)
+    const meRes = await request(app)
+      .get('/api/v1/providers/me/profile')
+      .set('Authorization', `Bearer ${providerToken}`);
+
+    const provId = meRes.body.data.id;
+    const pubRes = await request(app).get(`/api/v1/providers/${provId}`);
+
+    expect(pubRes.status).toBe(200);
+    expect(pubRes.body.data.reviewCount).toBe(0);
+    expect(pubRes.body.data.ratingAvg).toBeNull();
+  });
 });

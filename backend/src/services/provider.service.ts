@@ -59,7 +59,7 @@ export class ProviderService {
       serviceMode: profile.serviceMode,
       serviceRadiusKm: profile.serviceRadiusKm,
       isVerified: profile.isVerified,
-      ratingAvg: profile.ratingAvg,
+      ratingAvg: profile.reviewCount > 0 ? profile.ratingAvg : null,
       reviewCount: profile.reviewCount,
       availability: profile.availability,
       area: profile.location?.area || 'Local Area',

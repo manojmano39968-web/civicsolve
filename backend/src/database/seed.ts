@@ -3,6 +3,10 @@ import { getDatabase } from './index.js';
 import { runMigrations } from './migrate.js';
 
 export async function runSeeds(): Promise<void> {
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PROD_SEED !== 'true') {
+    throw new Error('Database seeding is blocked in production to prevent inserting demo credentials.');
+  }
+
   const db = getDatabase();
 
   console.log('🌱 Starting database seeding...');

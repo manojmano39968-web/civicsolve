@@ -161,7 +161,7 @@ export class CivicSolveIntelligenceEngine {
           serviceMode: candidate.serviceMode as any,
           serviceRadiusKm: candidate.serviceRadiusKm,
           isVerified: candidate.isVerified,
-          ratingAvg: candidate.ratingAvg,
+          ratingAvg: candidate.reviewCount > 0 ? candidate.ratingAvg : null,
           reviewCount: candidate.reviewCount,
           availability: candidate.availability,
           area: candidate.area,
